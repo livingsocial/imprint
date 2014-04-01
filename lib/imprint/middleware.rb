@@ -1,8 +1,10 @@
 module Imprint
   class Middleware
     
-    def self.set_trace_id
-      Imprint::Tracer.set_trace_id("#{Time.now.to_i}_#{Imprint::Tracer.rand_trace_id}")
+    def self.set_trace_id(env)
+      existing_id = env[Imprint::Tracer::TRACER_HEADER]
+      existing_id ||= "#{Time.now.to_i}_#{Imprint::Tracer.rand_trace_id}"
+      Imprint::Tracer.set_trace_id(existing_id)
     end
     
     def self.get_trace_id
@@ -14,7 +16,7 @@ module Imprint
     end
     
     def call(env)
-      ::Imprint::Middleware.set_trace_id
+      ::Imprint::Middleware.set_trace_id(env)
       @app.call(env)
     end
 

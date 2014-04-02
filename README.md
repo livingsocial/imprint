@@ -64,17 +64,17 @@ If you are using any additional loggers that you wanted tagged that are not part
 
 These queries should work in Kibana/ElasticSearch, Splunk, or other log solutions. We may need to support different output formatters in the future depending on how various logging systems handle default field extraction.
 
-First query to find a group of requests you are particularly interested in, perhaps all errors on an app
+First query to find a group of requests you are particularly interested in, perhaps all errors on an app:
 
     source="app_name" error status=500
 
-Front the results find a specific request that caused the error and use the trace_id to dig in futher, by crafting a query with the trace_id
+From the results find a specific request that caused the error and use the trace_id to dig in futher, by crafting a query with the trace_id.
 
-Find all log lines in a particular app related to a single request
+Find all log lines in a particular app related to a single request:
 
     source="app_name" "trace_id=1396448370_wdeYND"
 
-Find all long lines related to a single request across apps
+Find all long lines related to a single request across apps:
 
     "trace_id=1396448370_wdeYND"
     

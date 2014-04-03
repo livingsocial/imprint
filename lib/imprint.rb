@@ -3,8 +3,8 @@ require 'imprint/middleware'
 
 module Imprint
   class Tracer
-    TRACER_HEADER = 'HTTP_TRACE_ID'
-    TRACER_KEY    = 'trace_id'
+    TRACER_HEADER = 'HTTP_IMPRINTID'
+    TRACER_KEY    = 'IMPRINTID'
 
     TRACE_CHARS = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
     @@trace_id = -1

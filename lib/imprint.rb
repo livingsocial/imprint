@@ -7,14 +7,14 @@ module Imprint
     TRACER_KEY    = 'IMPRINTID'
 
     TRACE_CHARS = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
-    @@trace_id = -1
 
-    def self.set_trace_id(id)
-      @@trace_id = id
+    def self.set_trace_id(id, rails_env, rack_env)
+      rails_env[TRACER_KEY] = id
+      rack_env[TRACER_KEY] = id
     end
 
-    def self.get_trace_id
-      @@trace_id
+    def self.get_trace_id(rails_env)
+      rails_env[TRACER_KEY]
     end
 
     def self.rand_trace_id

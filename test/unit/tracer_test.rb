@@ -4,12 +4,12 @@ class TracerTest < Test::Unit::TestCase
 
   should "set trace id" do
     fake_trace = "tracer"
-    Imprint::Tracer.set_trace_id(fake_trace)
-    assert_equal fake_trace, Imprint::Tracer.get_trace_id
+    Imprint::Tracer.set_trace_id(fake_trace, ENV, {})
+    assert_equal fake_trace, Imprint::Tracer.get_trace_id(ENV)
   end
 
   should "get trace id defaults" do
-    assert_not_nil Imprint::Tracer.get_trace_id
+    assert_not_nil Imprint::Tracer.get_trace_id(ENV)
   end
 
   should "generate rand trace id" do

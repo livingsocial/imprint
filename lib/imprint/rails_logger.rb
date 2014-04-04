@@ -8,8 +8,8 @@ if defined?(ActiveSupport::BufferedLogger)
         # If a newline is necessary then create a new message ending with a newline.
         # Ensures that the original message is not mutated.
         message = "#{message}\n" unless message[-1] == "\n"
-        if (defined?(Imprint::Middleware)) && message && message.is_a?(String) && message.length > 1 && Imprint::Middleware.get_trace_id.to_s != '-1'
-          message = message.gsub("\n"," [trace_id=#{Imprint::Middleware.get_trace_id}]\n")
+        if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id(ENV)
+          message = message.gsub("\n"," [trace_id=#{Imprint::Tracer.get_trace_id(ENV)}]\n")
         end
         buffer << message
         auto_flush
@@ -28,8 +28,8 @@ if defined?(ActiveSupport::Logger::SimpleFormatter)
       # If a newline is necessary then create a new message ending with a newline.
       # Ensures that the original message is not mutated.
       message = "#{message}\n" unless message[-1] == "\n"
-      if (defined?(Imprint::Middleware)) && message && message.is_a?(String) && message.length > 1 && Imprint::Middleware.get_trace_id.to_s != '-1'
-        message = message.gsub("\n"," [trace_id=#{Imprint::Middleware.get_trace_id}]\n")
+      if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id(ENV)
+        message = message.gsub("\n"," [trace_id=#{Imprint::Tracer.get_trace_id(ENV)}]\n")
       end
       message
     end

@@ -13,7 +13,8 @@ module Imprint
       rack_env[TRACER_KEY] = id
     end
 
-    def self.get_trace_id(rails_env)
+    #this assumes the rails ENV is available at ENV
+    def self.get_trace_id(rails_env = ENV)
       rails_env[TRACER_KEY]
     end
 

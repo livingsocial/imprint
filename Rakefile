@@ -1,4 +1,4 @@
-require 'ls/gem_tasks'
+require "bundler/gem_tasks"
 
 task :default => :test
 require 'rake/testtask'

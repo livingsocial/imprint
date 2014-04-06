@@ -8,14 +8,14 @@ module Imprint
 
     TRACE_CHARS = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
 
-    def self.set_trace_id(id, rails_env, rack_env)
-      rails_env[TRACER_KEY] = id
+    def self.set_trace_id(id, rack_env = {})
+      Thread.current[TRACER_KEY] = id
+      # setting to the rack_env, gives error tracking support in some systems
       rack_env[TRACER_KEY] = id
     end
 
-    #this assumes the rails ENV is available at ENV
-    def self.get_trace_id(rails_env = ENV)
-      rails_env[TRACER_KEY]
+    def self.get_trace_id
+      Thread.current[TRACER_KEY]
     end
 
     def self.rand_trace_id

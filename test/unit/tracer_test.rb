@@ -4,12 +4,14 @@ class TracerTest < Test::Unit::TestCase
 
   should "set trace id" do
     fake_trace = "tracer"
-    Imprint::Tracer.set_trace_id(fake_trace, ENV, {})
-    assert_equal fake_trace, Imprint::Tracer.get_trace_id(ENV)
+    Imprint::Tracer.set_trace_id(fake_trace, fake_rack_env)
+    assert_equal fake_trace, Imprint::Tracer.get_trace_id
   end
 
   should "get trace id defaults" do
-    assert_not_nil Imprint::Tracer.get_trace_id(ENV)
+    assert_not_nil Imprint::Tracer.get_trace_id
+    Imprint::Tracer.set_trace_id(nil, fake_rack_env)
+    assert_equal nil, Imprint::Tracer.get_trace_id
   end
 
   should "generate rand trace id" do
@@ -17,6 +19,12 @@ class TracerTest < Test::Unit::TestCase
     assert_not_nil trace_id
     assert_equal 6, trace_id.length
     assert trace_id.match(/[A-Za-z]/)
+  end
+
+  protected
+
+  def fake_rack_env
+    {}
   end
 
 end

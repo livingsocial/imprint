@@ -20,8 +20,8 @@ class MiddlewareTest < Test::Unit::TestCase
     middleware = Imprint::Middleware.new(fake_app)
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
-    assert_not_nil ::Imprint::Tracer.get_trace_id(ENV)
-    assert ::Imprint::Tracer.get_trace_id(ENV)!='-1'
+    assert_not_nil ::Imprint::Tracer.get_trace_id
+    assert ::Imprint::Tracer.get_trace_id!='-1'
   end
 
   private

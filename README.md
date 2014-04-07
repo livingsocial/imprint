@@ -25,7 +25,7 @@ Or install it yourself as:
 
 After installing the gems and requiring them if needed.
 
-To configure in a Rails 3 or 4 application
+To configure in a Rails 2, 3, or 4 application
 
 edit `config/application.rb` and append the line below
 
@@ -79,6 +79,55 @@ Find all long lines related to a single request across apps:
     "trace_id=1396448370_wdeYND"
     
 Since the trace_id is appended to all log lines during the duration of the request, any `logger.info`, `logger.error`, or other log output is easy to track back to the initial request information, params, headers, or other system logged information such as if the request was successfully authorize and by whom.
+
+## Background Job Support
+
+We have a gateway wrapped about our Resque enqueue call. At this point I inject the trace_id. This makes it easy to ensure the job is queue with the params. So all failed jobs will include the trace_id
+
+    options[:trace_id] ||= if (defined?(Imprint::Tracer)) && Imprint::Tracer.get_trace_id
+      Imprint::Tracer.get_trace_id
+    else
+      nil
+    end
+    
+    Resque.enqueue(klazz, options)
+
+Once it is on the queue, I want to log the ID but remove it from the params as some jobs work direclty with an expected set of params.
+
+	def before_perform(*args)
+		pluck_imprint_id
+		#any other before filters
+    end
+
+    def pluck_imprint_id
+      if defined?(Imprint::Tracer)
+        existing_id = params.delete(:trace_id)
+        Imprint::Tracer.set_trace_id(existing_id, {}) if existing_id
+        true
+      end
+    end
+
+The process of adding support to other background processing should be pretty similar.
+
+## Internal API Request Tracing (cross app tracing)
+
+If you want to trace requests that go across multiple applications Imprint can help you out hear as well. Basically the middleware only generates a new trace_id if the incoming requests don't have a special Imprint header `HTTP_IMPRINTID`
+
+    existing_id = rack_env[Imprint::Tracer::TRACER_HEADER]
+    existing_id ||= "#{Time.now.to_i}_#{Imprint::Tracer.rand_trace_id}"
+    Imprint::Tracer.set_trace_id(existing_id, rack_env)
+
+
+To trace any requests made by a external facing app to internal APIs just inject the current `trace_id` into the header of the api request. Here is an example from a client gem. First we isolated all the requests to a single gem request gateway method `http_get`. Then in this example we are using `RestClient` so we just add the header to the outgoing request.
+
+      def self.http_get(url)
+        if defined?(Imprint::Tracer) && Imprint::Tracer.get_trace_id
+          RestClient.get(url, { Imprint::Tracer::TRACER_KEY => Imprint::Tracer.get_trace_id})
+        else
+          RestClient.get(url)
+        end
+      end
+	
 
 ## Contributing
 

@@ -54,7 +54,7 @@ def log(message = nil, severity = :info)
   log_raw(message, severity) do
     message = yield if block_given?
     # append imprint trace
-    if (defined?(Imprint::Middleware.get_trace_id)) && message && message.is_a?(String) && message.length > 1 && Imprint::Middleware.get_trace_id.get_trace_id.to_s != '-1'
+    if (defined?(Imprint::Tracer.get_trace_id)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id.get_trace_id
       message = "#{message}\n" unless message[-1] == "\n"
       message = message.gsub("\n"," [trace_id=#{Imprint::Middleware.get_trace_id}]\n")
     end

@@ -2,7 +2,7 @@
 
 Imprint helps track requests across multiple log lines or applications. It consists of a lightweight class and middleware to help set tracing ids.
 
-It also has a file which can be used to bootstrap default rails logging to embedding the imprint `trace_id` on each line logged. 
+It also has a file which can be used to bootstrap default rails logging to embedding the imprint `trace_id` on each line logged.
 
 Supporting tracing between applications requires updating client calls between applications, at the moment we don't try to monkey patch any of that in and expect responsible clients to add the header manually as described in the Usage section below.
 
@@ -10,16 +10,21 @@ Supporting tracing between applications requires updating client calls between a
 
 Add this line to your application's Gemfile:
 
-    gem 'imprint'
+```ruby
+gem 'imprint'
+```
 
 And then execute:
 
-    $ bundle
+```bash
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install imprint
-
+```bash
+$ gem install imprint
+```
 
 ## Usage
 
@@ -29,36 +34,41 @@ To configure in a Rails 2, 3, or 4 application
 
 edit `config/application.rb` and append the line below
 
-    require 'imprint/rails_logger'
-    
+```ruby
+require 'imprint/rails_logger'
+```
+
 create or update your middleware configuration (for example: `config/initializers/middleware.rb`)
 
-	```ruby
-	require 'imprint'
-    
-    Rails.application.config.middleware.insert_before Rails::Rack::Logger, Imprint::Middleware
-	```
-	
+```ruby
+require 'imprint'
+
+Rails.application.config.middleware.insert_before Rails::Rack::Logger, Imprint::Middleware
+```
+
 If you are using any additional loggers that you wanted tagged that are not part of the normal Rails.logger you should update them as well. For example, we have some scribe logs:
 
-    def log(message = nil, severity = :info)
-      mirror_logger.add(parse_severity(severity), message) if mirror_logger
-      log_raw(message, severity) do
-        message = yield if block_given?
-        # append imprint trace
-        if (defined?(Imprint::Middleware.get_trace_id)) && message && message.is_a?(String) && message.length > 1 && Imprint::Middleware.get_trace_id.get_trace_id.to_s != '-1'
-          message = "#{message}\n" unless message[-1] == "\n"
-          message = message.gsub("\n"," [trace_id=#{Imprint::Middleware.get_trace_id}]\n")
-        end
-        format = []
-        format << Time.now.to_f
-        format << @host
-        format << $$
-        format << format_severity(severity)
-        format << "app_name"
-        format << message
-        format.flatten.join("\t")
-      end
+```ruby
+def log(message = nil, severity = :info)
+  mirror_logger.add(parse_severity(severity), message) if mirror_logger
+  log_raw(message, severity) do
+    message = yield if block_given?
+    # append imprint trace
+    if (defined?(Imprint::Middleware.get_trace_id)) && message && message.is_a?(String) && message.length > 1 && Imprint::Middleware.get_trace_id.get_trace_id.to_s != '-1'
+      message = "#{message}\n" unless message[-1] == "\n"
+      message = message.gsub("\n"," [trace_id=#{Imprint::Middleware.get_trace_id}]\n")
+    end
+    format = []
+    format << Time.now.to_f
+    format << @host
+    format << $$
+    format << format_severity(severity)
+    format << "app_name"
+    format << message
+    format.flatten.join("\t")
+  end
+end
+```
 
 ## Example Queries
 
@@ -77,35 +87,39 @@ Find all log lines in a particular app related to a single request:
 Find all long lines related to a single request across apps:
 
     "trace_id=1396448370_wdeYND"
-    
+
 Since the trace_id is appended to all log lines during the duration of the request, any `logger.info`, `logger.error`, or other log output is easy to track back to the initial request information, params, headers, or other system logged information such as if the request was successfully authorize and by whom.
 
 ## Background Job Support
 
 We have a gateway wrapped about our Resque enqueue call. At this point I inject the trace_id. This makes it easy to ensure the job is queue with the params. So all failed jobs will include the trace_id
 
-    options[:trace_id] ||= if (defined?(Imprint::Tracer)) && Imprint::Tracer.get_trace_id
-      Imprint::Tracer.get_trace_id
-    else
-      nil
-    end
-    
-    Resque.enqueue(klazz, options)
+```ruby
+options[:trace_id] ||= if (defined?(Imprint::Tracer)) && Imprint::Tracer.get_trace_id
+  Imprint::Tracer.get_trace_id
+else
+  nil
+end
+
+Resque.enqueue(klazz, options)
+```
 
 Once it is on the queue, I want to log the ID but remove it from the params as some jobs work direclty with an expected set of params.
 
-	def before_perform(*args)
-		pluck_imprint_id
-		#any other before filters
-    end
+```ruby
+def before_perform(*args)
+	pluck_imprint_id
+	#any other before filters
+end
 
-    def pluck_imprint_id
-      if defined?(Imprint::Tracer)
-        existing_id = params.delete(:trace_id)
-        Imprint::Tracer.set_trace_id(existing_id, {}) if existing_id
-        true
-      end
-    end
+def pluck_imprint_id
+  if defined?(Imprint::Tracer)
+    existing_id = params.delete(:trace_id)
+    Imprint::Tracer.set_trace_id(existing_id, {}) if existing_id
+    true
+  end
+end
+```
 
 The process of adding support to other background processing should be pretty similar.
 
@@ -113,21 +127,23 @@ The process of adding support to other background processing should be pretty si
 
 If you want to trace requests that go across multiple applications Imprint can help you out hear as well. Basically the middleware only generates a new trace_id if the incoming requests don't have a special Imprint header `HTTP_IMPRINTID`
 
-    existing_id = rack_env[Imprint::Tracer::TRACER_HEADER]
-    existing_id ||= "#{Time.now.to_i}_#{Imprint::Tracer.rand_trace_id}"
-    Imprint::Tracer.set_trace_id(existing_id, rack_env)
-
+```ruby
+existing_id = rack_env[Imprint::Tracer::TRACER_HEADER]
+existing_id ||= "#{Time.now.to_i}_#{Imprint::Tracer.rand_trace_id}"
+Imprint::Tracer.set_trace_id(existing_id, rack_env)
+```
 
 To trace any requests made by a external facing app to internal APIs just inject the current `trace_id` into the header of the api request. Here is an example from a client gem. First we isolated all the requests to a single gem request gateway method `http_get`. Then in this example we are using `RestClient` so we just add the header to the outgoing request.
 
-      def self.http_get(url)
-        if defined?(Imprint::Tracer) && Imprint::Tracer.get_trace_id
-          RestClient.get(url, { Imprint::Tracer::TRACER_KEY => Imprint::Tracer.get_trace_id})
-        else
-          RestClient.get(url)
-        end
-      end
-	
+```ruby
+def self.http_get(url)
+  if defined?(Imprint::Tracer) && Imprint::Tracer.get_trace_id
+    RestClient.get(url, { Imprint::Tracer::TRACER_KEY => Imprint::Tracer.get_trace_id})
+  else
+    RestClient.get(url)
+  end
+end
+```
 
 ## Contributing
 
@@ -137,6 +153,6 @@ To trace any requests made by a external facing app to internal APIs just inject
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-## License 
+## License
 
 See LICENSE.txt for details.

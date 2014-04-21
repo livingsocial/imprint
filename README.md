@@ -125,7 +125,7 @@ The process of adding support to other background processing should be pretty si
 
 ## Internal API Request Tracing (cross app tracing)
 
-If you want to trace requests that go across multiple applications Imprint can help you out hear as well. Basically the middleware only generates a new trace_id if the incoming requests don't have a special Imprint header `HTTP_IMPRINTID`
+If you want to trace requests that go across multiple applications Imprint can help you out here as well. Basically the middleware only generates a new trace_id if the incoming requests don't have a special Imprint header `HTTP_IMPRINTID`
 
 ```ruby
 existing_id = rack_env[Imprint::Tracer::TRACER_HEADER]

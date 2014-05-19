@@ -6,6 +6,8 @@ It also has a file which can be used to bootstrap default rails logging to embed
 
 Supporting tracing between applications requires updating client calls between applications, at the moment we don't try to monkey patch any of that in and expect responsible clients to add the header manually as described in the Usage section below.
 
+If you have seen [ActionDispatch::RequestId](http://api.rubyonrails.org/classes/ActionDispatch/RequestId.html). Imprint is basically a generic Rack version of that idea. It works with Rails 3, Sinatra, and Pure Rack. Beyond that it also provides some helpers and configuration around the trace_id usage.
+
 ## Installation
 
 Add this line to your application's Gemfile:

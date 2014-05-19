@@ -147,6 +147,17 @@ def self.http_get(url)
 end
 ```
 
+## Notes / TODO
+
+Looking at ZipKin, it tries to accomplish many of the same goals as Imprint. I think it would make sence to support the same headers and format so they could be compatible. Although the ZipKin service tracing isn't as useful to me as the full detailed splunk / elastic search logs.
+
+* [ZipKin intro / docs](http://twitter.github.io/zipkin/index.html)
+* [Railsconf ZipKin intro: Distributed Request Tracing](http://www.confreaks.com/videos/3326-railsconf-distributed-request-tracing) by [Kenneth Hoxworth (@hoxworth)](https://twitter.com/hoxworth)
+* [ZipKin Header Formats](https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/Codec.scala#L216)
+* [Existing Ruby ZipKin Tracer](https://github.com/mszenher/zipkin-tracer)
+* [Twitter Minimal Zipkin Tracer](https://github.com/twitter/zipkin/tree/04a755c29e6b2ff3bd99534bb95d760f112fda08/zipkin-gems/zipkin-tracer)
+* [Docker ZipKin install for testing](https://github.com/itszero/docker-zipkin)
+
 ## Contributing
 
 1. Fork it

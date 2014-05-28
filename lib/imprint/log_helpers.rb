@@ -14,7 +14,11 @@ module Imprint
 
       http_request_headers = request.headers.select{|header_name, header_value| header_name.match("^HTTP.*") && !header_blacklist.include?(header_name) }
       data_append = "headers: "
-      http_request_headers.each_pair{|k,v| data_append << " #{k}=\"#{v}\"" }
+      if http_request_headers.respond_to?(:each_pair)
+        http_request_headers.each_pair{|k,v| data_append << " #{k}=\"#{v}\"" }
+      else
+        http_request_headers.each{|el| data_append << " #{el.first}=\"#{el.last}\"" }
+      end
 
       data_append << " params: "
       log_filter.filter(params).each_pair{|k,v| data_append << " #{k}=\"#{v}\"" }

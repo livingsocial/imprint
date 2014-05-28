@@ -72,6 +72,23 @@ def log(message = nil, severity = :info)
 end
 ```
 
+## Optional Helpers
+
+You can get a configurable log entrypoint for apps that allows for some intial logging on each request. This is intended to work well and be combined with lograge, but can be helpful on its own. To use the helpers follow the steps below.
+
+edit `config/application.rb` and append the lines below, with whatever options make sense for your projects:
+
+    require 'imprint/log_helpers'
+
+    # we are using a blacklist on headers opposed to a whitelist
+    HEADERS_TO_IGNORE = ['HTTP_COOKIE', 'HTTP_ACCEPT_ENCODING', 'HTTP_HOST', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_VERSION', 'HTTP_X_FORWARDED_PROTO', 'HTTP_HOST', 'HTTP_CONNECTION', 'HTTP_CACHE_CONTROL', 'HTTP_ACCEPT', 'HTTP_ACCEPT_ENCODING', 'HTTP_X_AKAMAI_EDGESCAPE', 'HTTP_AKAMAI_ORIGIN_HOP', 'HTTP_TE', 'HTTP_CLIENT_IP', 'HTTP_PRAGMA', 'HTTP_X_AKAMAI_CONFIG_LOG_DETAIL', 'HTTP_X_HTTPS', 'HTTP_X_REQUESTED_WITH', 'HTTP_VIA', 'HTTP_X_NEWRELIC_TRANSACTION', 'HTTP_AUTHORIZATION', 'HTTP_IF_MODIFIED_SINCE', 'HTTP_X_LS_MERCHANT_API_KEY', 'HTTP_X_CNECTION', 'HTTP_X_LIVINGSOCIAL_AUTH_TOKEN']
+    Imprint.configure({
+                   :log_filters => Rails.application.config.filter_parameters + ['some_other_token'],
+                   :header_blacklist => HEADERS_TO_IGNORE,
+                   :variables_to_append => ['viewer'],
+                   :cookies_whitelist => ['living_social_user_id']
+    })
+
 ## Example Queries
 
 These queries should work in Kibana/ElasticSearch, Splunk, or other log solutions. We may need to support different output formatters in the future depending on how various logging systems handle default field extraction.

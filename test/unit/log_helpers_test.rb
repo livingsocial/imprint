@@ -66,11 +66,11 @@ class LogHelpersTest < Test::Unit::TestCase
       ''
     end
 
-    request
-  end
+    def request.query_parameters
+      {}
+    end
 
-  def params
-    {}
+    request
   end
 
   def stub_rails

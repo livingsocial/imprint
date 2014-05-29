@@ -26,7 +26,7 @@ module Imprint
                          data_append << " #{cookie_key}=\"#{cookie_val}\""
                        end
 
-      logger.info "Started request_method=#{request.method.inspect} request_url=\"#{request.url.inspect}\" at request_time=\"#{Time.now.to_default_s}\" request_ip=#{request.remote_ip.inspect} #{data_append}"
+      logger.info "Started request_method=#{request.method.inspect} request_url=\"#{request.filtered_path}\" at request_time=\"#{Time.now.to_default_s}\" request_ip=#{request.remote_ip.inspect} #{data_append}"
     rescue
       logger.error "error logging log_entrypoint for request"
     end

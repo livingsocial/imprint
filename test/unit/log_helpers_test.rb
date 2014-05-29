@@ -62,6 +62,10 @@ class LogHelpersTest < Test::Unit::TestCase
       ''
     end
 
+    def request.filtered_path
+      ''
+    end
+
     def request.remote_ip
       ''
     end

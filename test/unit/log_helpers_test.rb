@@ -62,7 +62,7 @@ class LogHelpersTest < Test::Unit::TestCase
       ''
     end
 
-    def request.filtered_path
+    def request.path
       ''
     end
 

@@ -35,7 +35,7 @@ if defined?(ActiveSupport::BufferedLogger)
 end
 
 if defined?(ActiveSupport::Logger::SimpleFormatter)
-  #Rails 4
+  #Rails 4 dev / upgraded apps
   class ActiveSupport::Logger::SimpleFormatter
     def call(severity, time, progname, message)
       message = (message || (block && block.call) || progname).to_s
@@ -46,6 +46,18 @@ if defined?(ActiveSupport::Logger::SimpleFormatter)
         message = message.gsub("\n"," trace_id=#{Imprint::Tracer.get_trace_id}\n")
       end
       message
+    end
+  end
+  
+  #Rails 4 production newly generated apps
+  class Logger::Formatter
+    def call(severity, time, progname, msg)
+      message = msg2str(msg)
+      message = "#{message}\n" unless message[-1] == "\n"
+      if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id && !message.include?('trace_id=')
+        message = message.gsub("\n"," trace_id=#{Imprint::Tracer.get_trace_id}\n")
+      end
+      Format % [severity[0..0], format_datetime(time), $$, severity, progname, message]
     end
   end
 

@@ -72,6 +72,24 @@ def log(message = nil, severity = :info)
 end
 ```
 
+## Params logging options
+
+By default imprint will only log the query_params opposed to all params. This is because some of our apps don't filter logs well enough. If you are filtering correctly you might want more of the parameters logged. All params are still filtered by the `Rails.application.config.filter_parameters`.
+
+There are three options:
+
+* `FULL_PARAMS` log all params
+* `QUERY_PARAMS` log query params only (default)
+* `FULL_GET_PARAMS` log full params on get requests and query only on post requests
+
+To change from the default send the config option `:param_level` to `Imprint.configure`. You most likely want to do this in your `environment.rb`
+
+    Imprint.configure({
+                   :param_level => Imprint::FULL_GET_PARAMS
+                 })
+
+
+
 ## Optional Helpers
 
 You can get a configurable log entrypoint for apps that allows for some intial logging on each request. This is intended to work well and be combined with lograge, but can be helpful on its own. To use the helpers follow the steps below.

@@ -2,6 +2,15 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class MiddlewareTest < Minitest::Test
 
+  def setup
+    @logger = stub "logger", info: nil
+    Imprint::Middleware.logger = @logger
+  end
+
+  def teardown
+    Imprint::Middleware.logger = nil
+  end
+
   should "call app" do
     request = Rack::MockRequest.env_for("/anything.json")
     middleware = Imprint::Middleware.new(fake_app)
@@ -18,10 +27,11 @@ class MiddlewareTest < Minitest::Test
   should "set trace_id before calling app" do
     request = Rack::MockRequest.env_for("/anything.json")
     middleware = Imprint::Middleware.new(fake_app)
+    @logger.expects(:info).with {|x| x=~ /trace_status=initiated/ }
+
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
-    refute_nil ::Imprint::Tracer.get_trace_id
-    assert ::Imprint::Tracer.get_trace_id!='-1'
+    assert ::Imprint::Tracer.get_trace_id != ::Imprint::Tracer::TRACE_ID_DEFAULT
   end
 
   should "set trace_id from rails request_id" do
@@ -30,7 +40,7 @@ class MiddlewareTest < Minitest::Test
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
     refute_nil ::Imprint::Tracer.get_trace_id
-    assert ::Imprint::Tracer.get_trace_id=='existing_id'
+    assert_equal 'existing_id', ::Imprint::Tracer.get_trace_id
   end
 
   should "set trace_id from passed in imprint header" do
@@ -39,7 +49,7 @@ class MiddlewareTest < Minitest::Test
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
     refute_nil ::Imprint::Tracer.get_trace_id
-    assert ::Imprint::Tracer.get_trace_id=='existing_trace_id'
+    assert_equal 'existing_trace_id', ::Imprint::Tracer.get_trace_id
   end
 
   private

@@ -2,7 +2,7 @@ require 'logger'
 
 module Imprint
   class Middleware
-    
+
     def self.set_request_trace_id(rack_env)
       trace_id = rack_env[Imprint::Tracer::TRACER_HEADER] || rack_env[Imprint::Tracer::RAILS_REQUEST_ID]
       if trace_id.nil?
@@ -24,11 +24,11 @@ module Imprint
                     Logger.new(STDOUT)
                   end
     end
-    
+
     def initialize(app, opts = {})
       @app = app
     end
-    
+
     def call(env)
       ::Imprint::Middleware.set_request_trace_id(env)
       @app.call(env)

@@ -10,21 +10,21 @@ if defined?(ActiveSupport::BufferedLogger)
           # If a newline is necessary then create a new message ending with a newline.
           # Ensures that the original message is not mutated.
           message = "#{message}\n" unless message[-1] == "\n"
-          if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id && !message.include?('trace_id=')
-            message = message.gsub("\n"," trace_id=#{Imprint::Tracer.get_trace_id}\n")
+          if defined?(Imprint::Tracer)
+            Imprint::Tracer.insert_trace_id_in_message(message)
           end
           buffer << message
           auto_flush
           message
         else
-          # rails 3.2.x 
+          # rails 3.2.x
           return if !level.nil? && (level > severity)
           message = (message || (block && block.call) || progname).to_s
           # If a newline is necessary then create a new message ending with a newline.
           # Ensures that the original message is not mutated.
           message = "#{message}\n" unless message[-1] == "\n"
-          if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id && !message.include?('trace_id=')
-            message = message.gsub("\n"," trace_id=#{Imprint::Tracer.get_trace_id}\n")
+          if defined?(Imprint::Tracer)
+            Imprint::Tracer.insert_trace_id_in_message(message)
           end
           @log.add(severity, message, progname, &block)
         end
@@ -42,20 +42,20 @@ if defined?(ActiveSupport::Logger::SimpleFormatter)
       # If a newline is necessary then create a new message ending with a newline.
       # Ensures that the original message is not mutated.
       message = "#{message}\n" unless message[-1] == "\n"
-      if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id && !message.include?('trace_id=')
-        message = message.gsub("\n"," trace_id=#{Imprint::Tracer.get_trace_id}\n")
+      if defined?(Imprint::Tracer)
+        Imprint::Tracer.insert_trace_id_in_message(message)
       end
       message
     end
   end
-  
+
   #Rails 4 production newly generated apps
   class Logger::Formatter
     def call(severity, time, progname, msg)
       message = msg2str(msg)
       message = "#{message}\n" unless message[-1] == "\n"
-      if (defined?(Imprint::Tracer)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id && !message.include?('trace_id=')
-        message = message.gsub("\n"," trace_id=#{Imprint::Tracer.get_trace_id}\n")
+      if defined?(Imprint::Tracer)
+        Imprint::Tracer.insert_trace_id_in_message(message)
       end
       Format % [severity[0..0], format_datetime(time), $$, severity, progname, message]
     end

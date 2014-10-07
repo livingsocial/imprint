@@ -30,7 +30,7 @@ class Time
   end
 end
 
-class LogHelpersTest < Test::Unit::TestCase
+class LogHelpersTest < Minitest::Test
   include Imprint::LogHelpers
   Imprint.configure({})
 

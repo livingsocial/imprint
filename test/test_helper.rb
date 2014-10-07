@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'simplecov'
-require 'test/unit'
+require 'minitest/autorun'
 require 'shoulda'
 require 'mocha/setup'
 require 'rack'

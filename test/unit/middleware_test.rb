@@ -1,6 +1,6 @@
 require File.expand_path('../test_helper', File.dirname(__FILE__))
 
-class MiddlewareTest < Test::Unit::TestCase
+class MiddlewareTest < Minitest::Test
 
   should "call app" do
     request = Rack::MockRequest.env_for("/anything.json")
@@ -20,7 +20,7 @@ class MiddlewareTest < Test::Unit::TestCase
     middleware = Imprint::Middleware.new(fake_app)
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
-    assert_not_nil ::Imprint::Tracer.get_trace_id
+    refute_nil ::Imprint::Tracer.get_trace_id
     assert ::Imprint::Tracer.get_trace_id!='-1'
   end
 
@@ -29,7 +29,7 @@ class MiddlewareTest < Test::Unit::TestCase
     middleware = Imprint::Middleware.new(fake_app)
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
-    assert_not_nil ::Imprint::Tracer.get_trace_id
+    refute_nil ::Imprint::Tracer.get_trace_id
     assert ::Imprint::Tracer.get_trace_id=='existing_id'
   end
 
@@ -38,7 +38,7 @@ class MiddlewareTest < Test::Unit::TestCase
     middleware = Imprint::Middleware.new(fake_app)
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
-    assert_not_nil ::Imprint::Tracer.get_trace_id
+    refute_nil ::Imprint::Tracer.get_trace_id
     assert ::Imprint::Tracer.get_trace_id=='existing_trace_id'
   end
 

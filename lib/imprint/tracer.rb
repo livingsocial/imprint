@@ -17,7 +17,7 @@ module Imprint
     end
 
     def self.rand_trace_id
-      (0...6).map { TRACE_CHARS[rand(TRACE_CHARS.length)] }.join    
+      (0...6).map { TRACE_CHARS[rand(TRACE_CHARS.length)] }.join
     end
   end
 end

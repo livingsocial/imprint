@@ -21,6 +21,15 @@ end
 
 class Rails
   def self.application
+    @app ||= Object.new.tap do |app|
+      def app.config
+        @config ||= Object.new.tap do |config|
+          def config.filter_parameters
+            []
+          end
+        end
+      end
+    end
   end
 end
 
@@ -35,14 +44,19 @@ class LogHelpersTest < Minitest::Test
   Imprint.configure({})
 
   should "log entry" do
-    stub_rails
-    logger.expects(:info).with(anything).once
+    count = 0
+    logger.expect(:info, nil) { count += 1 }
     log_entrypoint
+    logger.verify
+    assert_equal 1, count
   end
 
   should "log entry catches exceptions and logs them" do
-    logger.expects(:error).with(anything).once
+    count = 0
+    logger.expect(:error, nil) { count += 1 }
     log_entrypoint
+    logger.verify
+    assert_equal 1, count
   end
 
   protected
@@ -77,16 +91,8 @@ class LogHelpersTest < Minitest::Test
     request
   end
 
-  def stub_rails
-    rails_config ||= mock('config')
-    rails_config.stubs(:filter_parameters).returns([])
-    rails_app ||= mock('application')
-    rails_app.stubs(:config).returns(rails_config)
-    Rails.stubs(:application).returns(rails_app)
-  end
-
   def logger
-    @fake_log ||= mock('logger')
+    @fake_log ||= Minitest::Mock.new
   end
 
   def cookies

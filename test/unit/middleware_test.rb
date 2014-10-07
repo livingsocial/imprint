@@ -3,17 +3,19 @@ require File.expand_path('../../test_helper', __FILE__)
 class MiddlewareTest < Minitest::Test
 
   def setup
-    @logger = stub "logger", info: nil
+    @logger = Minitest::Mock.new
     Imprint::Middleware.logger = @logger
   end
 
   def teardown
     Imprint::Middleware.logger = nil
+    @logger.verify
   end
 
   should "call app" do
     request = Rack::MockRequest.env_for("/anything.json")
     middleware = Imprint::Middleware.new(fake_app)
+    @logger.expect(:info, nil) { true }
     results = middleware.call(request)
     assert_equal "/anything.json", results.last
   end
@@ -21,13 +23,14 @@ class MiddlewareTest < Minitest::Test
   should 'pass all rack lint checks' do
     app = Rack::Lint.new(Imprint::Middleware.new(fake_app))
     env = Rack::MockRequest.env_for('/hello')
+    @logger.expect(:info, nil) { true }
     app.call(env)
   end
 
   should "set trace_id before calling app" do
     request = Rack::MockRequest.env_for("/anything.json")
     middleware = Imprint::Middleware.new(fake_app)
-    @logger.expects(:info).with {|x| x=~ /trace_status=initiated/ }
+    @logger.expect(:info, nil) {|x| x=~ /trace_status=initiated/ }
 
     results = middleware.call(request)
     assert_equal "/anything.json", results.last

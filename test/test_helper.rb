@@ -16,3 +16,10 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 Mocha::Configuration.prevent(:stubbing_non_existent_method)
 
 require 'imprint'
+
+class Minitest::Test
+  def before_setup
+    # Remove any existing trace id before each test
+    Imprint::Tracer.set_trace_id nil
+  end
+end

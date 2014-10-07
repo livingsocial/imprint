@@ -9,9 +9,11 @@ class TracerTest < Minitest::Test
   end
 
   should "get trace id defaults" do
+    assert_equal Imprint::Tracer::TRACE_ID_DEFAULT, Imprint::Tracer.get_trace_id
+    Imprint::Tracer.set_trace_id("fake_trace", fake_rack_env)
     refute_nil Imprint::Tracer.get_trace_id
     Imprint::Tracer.set_trace_id(nil, fake_rack_env)
-    assert_equal nil, Imprint::Tracer.get_trace_id
+    assert_equal Imprint::Tracer::TRACE_ID_DEFAULT, Imprint::Tracer.get_trace_id
   end
 
   should "generate rand trace id" do

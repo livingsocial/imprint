@@ -236,7 +236,7 @@ applications.
 
 1. Imprint patches the Rails logger so that *all* log messages incorporate the
    trace id if one is in effect when the message is logged.  Each line of the
-   log messages ends like this: "&nbsp;[trace_id=1411414337_pDLsqp]".
+   log messages ends like this: "&nbsp;trace_id=1411414337_pDLsqp".
 2. Immediately upon receipt of each new request, Imprint checks to see whether
    the request came with an attached trace id, by checking for the presence
    of an `::Imprint::Tracer::TRACER_HEADER` ("HTTP_TRACE_ID") HTTP header. If
@@ -246,7 +246,7 @@ applications.
    since the Unix epoch) plus a random string of six upper- and lowercase
    ASCII letters, separated by an underscore (e.g., "1411414337_pDLsqp").
    Then it logs an initiating event
-   ("Initiated trace.&nbsp;[trace_id=1411414337_pDLsqp]").
+   ("trace_status=initiated&nbsp;trace_id=1411414337_pDLsqp").
 4. Once a trace id has been found or generated, it is placed where every part
    of the application that participates in the current request has access to
    it (a variable scoped to the current thread, accessed via

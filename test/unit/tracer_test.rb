@@ -1,6 +1,6 @@
-require File.expand_path('../test_helper', File.dirname(__FILE__))
+require File.expand_path('../../test_helper', __FILE__)
 
-class TracerTest < Test::Unit::TestCase
+class TracerTest < Minitest::Test
 
   should "set trace id" do
     fake_trace = "tracer"
@@ -9,14 +9,16 @@ class TracerTest < Test::Unit::TestCase
   end
 
   should "get trace id defaults" do
-    assert_not_nil Imprint::Tracer.get_trace_id
+    assert_equal Imprint::Tracer::TRACE_ID_DEFAULT, Imprint::Tracer.get_trace_id
+    Imprint::Tracer.set_trace_id("fake_trace", fake_rack_env)
+    refute_nil Imprint::Tracer.get_trace_id
     Imprint::Tracer.set_trace_id(nil, fake_rack_env)
-    assert_equal nil, Imprint::Tracer.get_trace_id
+    assert_equal Imprint::Tracer::TRACE_ID_DEFAULT, Imprint::Tracer.get_trace_id
   end
 
   should "generate rand trace id" do
     trace_id = Imprint::Tracer.rand_trace_id
-    assert_not_nil trace_id
+    refute_nil trace_id
     assert_equal 6, trace_id.length
     assert trace_id.match(/[A-Za-z]/)
   end

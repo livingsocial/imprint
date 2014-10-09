@@ -1,12 +1,21 @@
 # Imprint
 
-Imprint helps track requests across multiple log lines or applications. It consists of a lightweight class and middleware to help set tracing ids.
+Imprint helps track requests across multiple log lines or applications. It
+consists of a lightweight class and middleware to help set tracing ids.
 
-It also has a file which can be used to bootstrap default rails logging to embedding the imprint `trace_id` on each line logged.
+It also has a file which can be used to bootstrap default rails logging to
+embedding the imprint `trace_id` on each line logged.
 
-Supporting tracing between applications requires updating client calls between applications, at the moment we don't try to monkey patch any of that in and expect responsible clients to add the header manually as described in the Usage section below.
+Supporting tracing between applications requires updating client calls between
+applications, at the moment we don't try to monkey patch any of that in and
+expect responsible clients to add the header manually as described in the Usage
+section below.
 
-If you have seen [ActionDispatch::RequestId](http://api.rubyonrails.org/classes/ActionDispatch/RequestId.html). Imprint is basically a generic Rack version of that idea. It works with Rails 3, Sinatra, and Pure Rack. Beyond that it also provides some helpers and configuration around the trace_id usage.
+If you have seen
+[ActionDispatch::RequestId](http://api.rubyonrails.org/classes/ActionDispatch/RequestId.html).
+Imprint is basically a generic Rack version of that idea. It works with Rails 3,
+Sinatra, and Pure Rack. Beyond that it also provides some helpers and
+configuration around the trace_id usage.
 
 ## Installation
 
@@ -56,10 +65,7 @@ def log(message = nil, severity = :info)
   log_raw(message, severity) do
     message = yield if block_given?
     # append imprint trace
-    if (defined?(Imprint::Tracer.get_trace_id)) && message && message.is_a?(String) && message.length > 1 && Imprint::Tracer.get_trace_id.get_trace_id
-      message = "#{message}\n" unless message[-1] == "\n"
-      message = message.gsub("\n"," [trace_id=#{Imprint::Middleware.get_trace_id}]\n")
-    end
+	Imprint::Tracer.insert_trace_id_in_message(message) if defined?(Imprint::Tracer)
     format = []
     format << Time.now.to_f
     format << @host
@@ -181,6 +187,119 @@ def self.http_get(url)
   end
 end
 ```
+## Why, and How
+
+Large systems that are composed of multiple communicating, cooperating parts can
+be difficult to understand.  The idea of Imprint is that it is very useful to
+assign a unique identifier to each *top-level*, *initiating* event that starts a
+series of operations within your system, and have that identifier propagated
+throughout the entire system, and attached to relevant diagnostic information
+(especially log messages).  If a system is consistent about doing this, it
+becomes easy to trace or visualize *all* of the actions that are taken as a part
+of processing some request or event, or as side effects.  That can be extremely
+useful for diagnosing bugs, finding bottlenecks, documenting intrusions, or
+simply understanding the structure of a large complex system.
+
+Imprint calls these identifiers *trace ids*.
+
+Initiating events are, technically, anything that takes place in your system
+that does not already have a trace id associated with it.  Typically, they
+include:
+
+* Initial browser requests from users (internal or external) using web
+  applications
+* Cron jobs or other scheduled jobs that initiate periodic processing
+* API requests that come from integration partners
+
+Imprint and tools like it should log all initiating events; that is, they
+should log each time that they assign a new trace id to a request or event
+that does not already have one.  If you see initiating events where you do not
+expect them, that might just mean that part of your system is not propagating
+existing trace ids properly as it sends messages or calls other services.
+However, it might indicate an attempt to penetrate your system in an
+unauthorized way.  It is a good idea to catalog the known initiating events in
+your system, and set up some kind of monitoring to notice and alert you of
+unexpected ones.
+
+Request tracing across a complex system can't be accomplished just by a single
+Ruby gem.  It requires cooperation from all of the applications, services,  and
+components of the system.  The rest of this section documents how Imprint works
+and what it expects from the other parts of the system, to help you implement
+request tracing across all of the parts of your system, even if they are not
+Rails applications or even written in Ruby.
+
+### What Imprint Does
+
+Here's what Imprint actually does. You should implement similar functionality
+for parts of your system that are not written in Ruby, or are not Rails
+applications.
+
+1. Imprint patches the Rails logger so that *all* log messages incorporate the
+   trace id if one is in effect when the message is logged.  Each line of the
+   log messages ends like this: "&nbsp;trace_id=1411414337_pDLsqp".
+2. Immediately upon receipt of each new request, Imprint checks to see whether
+   the request came with an attached trace id, by checking for the presence
+   of an `::Imprint::Tracer::TRACER_HEADER` ("HTTP_TRACE_ID") HTTP header. If
+   present, that trace id is kept as the trace id of the current request.
+3. If no trace id was included with the request, a new trace id is assigned.
+   The new trace id consists of an integer timestamp (the number of seconds
+   since the Unix epoch) plus a random string of six upper- and lowercase
+   ASCII letters, separated by an underscore (e.g., "1411414337_pDLsqp").
+   Then it logs an initiating event
+   ("trace_status=initiated&nbsp;trace_id=1411414337_pDLsqp").
+4. Once a trace id has been found or generated, it is placed where every part
+   of the application that participates in the current request has access to
+   it (a variable scoped to the current thread, accessed via
+   `::Imprint::Tracer::get_trace_id`).
+
+### What Cooperating Applications and Components Should Do
+
+Imprint is just part of the total solution; applications and services have
+responsibilities as well.
+
+1. Either use Imprint (if you're building a Rails app) or implement equivalent
+   functionality in your app.
+2. Any HTTP requests, Resque jobs, Kafka messages, or anything else that
+   involves a different application or service in processing the request
+   should be passed the trace id, either in the HTTP header or in an envelope
+   field or something similar with the name `::Imprint::Tracer::TRACER_KEY`
+   ("trace_id").  (See "Threading Considerations" below if your app employs
+   concurrency in request processing.)
+
+### Threading Considerations
+
+In request tracing, it's crucial that the trace id is associated with
+*everything* that is done because of the initiating event.  This means that
+every part of an application or component must have access to the current trace
+id, even if they are in different threads or processes than the one that
+initially recorded the trace id.
+
+The Rails architecture makes this easy. From the time a Rails app receives a
+request, all of the processing for that request takes place in a single thread.
+So Imprint puts the trace id in a variable scoped to the current thread.
+
+However, many applications or frameworks employ concurrency during the
+processing of a single request.  Such systems need to ensure that the other
+threads (or processes, perhaps) that participate also know the trace id of
+what they're working on.
+
+If the initial thread simply spawns new threads to do part of the work, it
+might work to simply use something like Java's `InheritableThreadLocal`.
+
+More typically, though, parts of the work will be farmed out to worker threads
+(actors, for example) that already exist in a pool and handle work for many
+requests during their lifetime. In such cases, the messages or task
+descriptions that are sent to those workers should include the trace id
+associated with that work, and the workers should ensure that the appropriate
+trace id is included in all of their processes.
+
+So, in short: each such worker thread should be treated as if it were a
+separate service: it should receive a trace id with each work request, attach
+that trace id to all log messages that are part of that work request, and
+propagate it in any other service or work requests that it sends. The exception
+is that it should be considered an error if those internal worker threads
+receive a request without a trace id; it's not reasonable for that to be an
+initiating event.
 
 ## Notes / TODO
 

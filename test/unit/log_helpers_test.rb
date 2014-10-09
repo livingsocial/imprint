@@ -45,11 +45,8 @@ class LogHelpersTest < Minitest::Test
   Imprint.configure({})
 
   should "log entry" do
-    count = 0
-
-    increment_count = Proc.new do |*args|
-      count += 1
-    end
+    count           = 0
+    increment_count = Proc.new { count += 1 }
 
     logger.stub :info, increment_count do
       log_entrypoint
@@ -60,11 +57,8 @@ class LogHelpersTest < Minitest::Test
 
   should "log entry catches exceptions and logs them" do
     Imprint.stub :configuration, nil do
-      count = 0
-
-      increment_count = Proc.new do |*args|
-        count += 1
-      end
+      count           = 0
+      increment_count = Proc.new { count += 1 }
 
       logger.stub :error, increment_count do
         log_entrypoint

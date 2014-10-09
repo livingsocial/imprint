@@ -1,5 +1,6 @@
 require File.expand_path('../../test_helper', __FILE__)
 require 'imprint/log_helpers'
+require 'logger'
 
 ####
 # Testing Rails integration without Rails isn't fun
@@ -45,18 +46,32 @@ class LogHelpersTest < Minitest::Test
 
   should "log entry" do
     count = 0
-    logger.expect(:info, nil) { count += 1 }
-    log_entrypoint
-    logger.verify
+
+    increment_count = Proc.new do |*args|
+      count += 1
+    end
+
+    logger.stub :info, increment_count do
+      log_entrypoint
+    end
+
     assert_equal 1, count
   end
 
   should "log entry catches exceptions and logs them" do
-    count = 0
-    logger.expect(:error, nil) { count += 1 }
-    log_entrypoint
-    logger.verify
-    assert_equal 1, count
+    Imprint.stub :configuration, nil do
+      count = 0
+
+      increment_count = Proc.new do |*args|
+        count += 1
+      end
+
+      logger.stub :error, increment_count do
+        log_entrypoint
+      end
+
+      assert_equal 2, count
+    end
   end
 
   protected
@@ -92,7 +107,7 @@ class LogHelpersTest < Minitest::Test
   end
 
   def logger
-    @fake_log ||= Minitest::Mock.new
+    @fake_log ||= Logger.new(STDOUT)
   end
 
   def cookies

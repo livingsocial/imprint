@@ -45,7 +45,7 @@ module Imprint
       logger.info "Started request_method=#{request.method.inspect} request_url=\"#{request.path}\" request_time=\"#{Time.now.to_default_s}\" request_ip=#{request.remote_ip.inspect} #{data_append}"
     rescue => e
       logger.error "error logging log_entrypoint for request: #{e.inspect}"
-      logger.error e.backtrace.take(10)
+      logger.error e.backtrace.take(10).join("\n")
     end
 
     def set_full_params(log_filter, data_append)

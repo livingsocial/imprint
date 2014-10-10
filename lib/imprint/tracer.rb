@@ -22,10 +22,10 @@ module Imprint
     end
 
     def self.insert_trace_id_in_message(message)
-      if message && message.is_a?(String) &&
-          message.length > 1 && !message.include?('trace_id=') &&
-          trace_id = get_trace_id && trace_id != TRACE_ID_DEFAULT
-        message.gsub!("\n"," trace_id=#{trace_id}\n")
+      if message && message.is_a?(String) && message.length > 1 && !message.include?('trace_id=')
+        trace_id = get_trace_id
+
+        message.gsub!("\n"," trace_id=#{trace_id}\n") if trace_id && trace_id != TRACE_ID_DEFAULT
       end
     end
 

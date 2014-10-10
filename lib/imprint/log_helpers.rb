@@ -22,6 +22,7 @@ module Imprint
       end
 
       data_append << " params: "
+
       if param_level==Imprint::FULL_PARAMS
         set_full_params(log_filter, data_append)
       elsif param_level==Imprint::FULL_GET_PARAMS
@@ -34,14 +35,17 @@ module Imprint
         set_query_params(log_filter, data_append)
       end
 
-      cookies_whitelist.each do |cookie_key|
-                         cookie_val = cookies[cookie_key] ? cookies[cookie_key] : 'nil'
-                         data_append << " #{cookie_key}=\"#{cookie_val}\""
-                       end
+      if defined? cookies
+        cookies_whitelist.each do |cookie_key|
+          cookie_val = cookies[cookie_key] ? cookies[cookie_key] : 'nil'
+          data_append << " #{cookie_key}=\"#{cookie_val}\""
+        end
+      end
 
       logger.info "Started request_method=#{request.method.inspect} request_url=\"#{request.path}\" request_time=\"#{Time.now.to_default_s}\" request_ip=#{request.remote_ip.inspect} #{data_append}"
-    rescue
-      logger.error "error logging log_entrypoint for request"
+    rescue => e
+      logger.error "error logging log_entrypoint for request: #{e.inspect}"
+      logger.error e.backtrace.take(10).join("\n")
     end
 
     def set_full_params(log_filter, data_append)

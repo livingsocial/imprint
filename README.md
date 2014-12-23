@@ -121,7 +121,7 @@ First query to find a group of requests you are particularly interested in, perh
 
     source="app_name" error status=500
 
-From the results find a specific request that caused the error and use the trace_id to dig in futher, by crafting a query with the trace_id.
+From the results find a specific request that caused the error and use the trace_id to dig in further, by crafting a query with the trace_id.
 
 Find all log lines in a particular app related to a single request:
 
@@ -147,7 +147,7 @@ end
 Resque.enqueue(klazz, options)
 ```
 
-Once it is on the queue, I want to log the ID but remove it from the params as some jobs work direclty with an expected set of params.
+Once it is on the queue, I want to log the ID but remove it from the params as some jobs work directly with an expected set of params.
 
 ```ruby
 def before_perform(*args)
@@ -303,7 +303,7 @@ initiating event.
 
 ## Notes / TODO
 
-Looking at ZipKin, it tries to accomplish many of the same goals as Imprint. I think it would make sence to support the same headers and format so they could be compatible. Although the ZipKin service tracing isn't as useful to me as the full detailed splunk / elastic search logs.
+Looking at ZipKin, it tries to accomplish many of the same goals as Imprint. I think it would make sense to support the same headers and format so they could be compatible. Although the ZipKin service tracing isn't as useful to me as the full detailed Splunk/ElasticSearch logs.
 
 * [ZipKin intro / docs](http://twitter.github.io/zipkin/index.html)
 * [Railsconf ZipKin intro: Distributed Request Tracing](http://www.confreaks.com/videos/3326-railsconf-distributed-request-tracing) by [Kenneth Hoxworth (@hoxworth)](https://twitter.com/hoxworth)

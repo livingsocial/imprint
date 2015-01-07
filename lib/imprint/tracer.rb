@@ -3,7 +3,7 @@ module Imprint
     TRACER_HEADER    = 'HTTP_IMPRINTID'
     TRACER_KEY       = 'IMPRINTID'
     RAILS_REQUEST_ID = "action_dispatch.request_id"
-    TRACE_ID_DEFAULT = -1
+    TRACE_ID_DEFAULT = "-1"
 
     TRACE_CHARS = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
 

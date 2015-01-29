@@ -1,0 +1,5 @@
+
+
+* Jan 7, 2015: move the default trace_id from -1 to "-1" this breaks some apps test integration but is unlikely to have real world effects. Bumped to Version 1.4.2
+
+* before Jan 7 2015, see git history no change log existed then

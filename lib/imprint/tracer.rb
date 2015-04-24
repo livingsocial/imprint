@@ -9,7 +9,7 @@ module Imprint
     TRACE_CHARS = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
 
     def self.set_trace_id(id, rack_env = {})
-      Thread.current[TRACER_TIMESTAMP] ||= Time.now.to_f
+      Thread.current[TRACER_TIMESTAMP] ||= Time.now.strftime("%Y-%m-%dT%H:%M:%S.%6N")
       Thread.current[TRACER_KEY] = id
       # setting to the rack_env, gives error tracking support in some systems
       rack_env[TRACER_KEY] = id
@@ -24,7 +24,7 @@ module Imprint
     end
 
     def	self.get_trace_timestamp
-      Thread.current[TRACER_TIMESTAMP] ||= Time.now.to_f
+      Thread.current[TRACER_TIMESTAMP] ||= Time.now.strftime("%Y-%m-%dT%H:%M:%S.%6N")
     end
 
     def self.insert_trace_id_in_message(message)

@@ -11,7 +11,7 @@ class TracerTest < Minitest::Test
   should "set trace timestamp" do
     fake_trace = "tracer"
     Timecop.freeze do
-      test_time = Time.now
+      test_time = Time.now.utc
       Imprint::Tracer.set_trace_id(fake_trace, fake_rack_env)
       # timecop has a bug with millisec time on osx
       # this makes the check ignore millisec
@@ -29,7 +29,7 @@ class TracerTest < Minitest::Test
 
   should "get trace timestamp defaults" do
     Timecop.freeze do
-      test_time = Time.now
+      test_time = Time.now.utc
       # timecop has a bug with millisec time on osx
       # this makes the check ignore millisec
       assert !!Imprint::Tracer.get_trace_timestamp.to_s.match(/#{test_time.strftime("%Y-%m-%dT%H:%M:%S")}/)

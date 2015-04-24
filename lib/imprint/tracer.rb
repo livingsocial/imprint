@@ -23,7 +23,7 @@ module Imprint
     end
 
     def self.get_trace_timestamp
-      Thread.current[TRACER_TIMESTAMP] ||= Time.now.strftime("%Y-%m-%dT%H:%M:%S.%6N") + " ##{$$}"
+      Thread.current[TRACER_TIMESTAMP] ||= Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6N") + " ##{$$}"
     end
 
     def self.insert_trace_id_in_message(message, severity = nil)

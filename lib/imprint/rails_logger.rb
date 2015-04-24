@@ -11,7 +11,7 @@ if defined?(ActiveSupport::BufferedLogger)
           # Ensures that the original message is not mutated.
           message = "#{message}\n" unless message[-1] == "\n"
           if defined?(Imprint::Tracer)
-            Imprint::Tracer.insert_trace_id_in_message(message)
+            Imprint::Tracer.insert_trace_id_in_message(message, severity)
           end
           buffer << message
           auto_flush
@@ -24,7 +24,7 @@ if defined?(ActiveSupport::BufferedLogger)
           # Ensures that the original message is not mutated.
           message = "#{message}\n" unless message[-1] == "\n"
           if defined?(Imprint::Tracer)
-            Imprint::Tracer.insert_trace_id_in_message(message)
+            Imprint::Tracer.insert_trace_id_in_message(message, severity)
           end
           @log.add(severity, message, progname, &block)
         end
@@ -43,7 +43,7 @@ if defined?(ActiveSupport::Logger::SimpleFormatter)
       # Ensures that the original message is not mutated.
       message = "#{message}\n" unless message[-1] == "\n"
       if defined?(Imprint::Tracer)
-        Imprint::Tracer.insert_trace_id_in_message(message)
+        Imprint::Tracer.insert_trace_id_in_message(message, severity)
       end
       message
     end
@@ -55,7 +55,7 @@ if defined?(ActiveSupport::Logger::SimpleFormatter)
       message = msg2str(msg)
       message = "#{message}\n" unless message[-1] == "\n"
       if defined?(Imprint::Tracer)
-        Imprint::Tracer.insert_trace_id_in_message(message)
+        Imprint::Tracer.insert_trace_id_in_message(message, severity)
       end
       Format % [severity[0..0], format_datetime(time), $$, severity, progname, message]
     end

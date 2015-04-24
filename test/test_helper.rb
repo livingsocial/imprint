@@ -3,6 +3,7 @@ require 'simplecov'
 require 'minitest/autorun'
 require 'shoulda'
 require 'rack'
+require 'timecop'
 
 SimpleCov.start do
   add_filter 'specs/ruby/1.9.1/gems/'

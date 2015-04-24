@@ -8,6 +8,17 @@ class TracerTest < Minitest::Test
     assert_equal fake_trace, Imprint::Tracer.get_trace_id
   end
 
+  should "set trace timestamp" do
+    fake_trace = "tracer"
+    Timecop.freeze do
+      test_time = Time.now
+      Imprint::Tracer.set_trace_id(fake_trace, fake_rack_env)
+      # timecop has a bug with millisec time on osx
+      # this makes the check ignore millisec
+      assert !!Imprint::Tracer.get_trace_timestamp.to_s.match(/#{test_time.to_i.to_s}/)
+    end
+  end
+
   should "get trace id defaults" do
     assert_equal Imprint::Tracer::TRACE_ID_DEFAULT, Imprint::Tracer.get_trace_id
     Imprint::Tracer.set_trace_id("fake_trace", fake_rack_env)
@@ -16,6 +27,15 @@ class TracerTest < Minitest::Test
     assert_equal Imprint::Tracer::TRACE_ID_DEFAULT, Imprint::Tracer.get_trace_id
   end
 
+  should "get trace timestamp defaults" do
+    Timecop.freeze do
+      test_time = Time.now
+      # timecop has a bug with millisec time on osx
+      # this makes the check ignore millisec
+      assert !!Imprint::Tracer.get_trace_timestamp.to_s.match(/#{test_time.to_i.to_s}/)
+    end
+  end
+  
   should "generate rand trace id" do
     trace_id = Imprint::Tracer.rand_trace_id
     refute_nil trace_id

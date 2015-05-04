@@ -8,7 +8,7 @@ module Imprint
     TRACE_CHARS      = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
 
     def self.set_trace_id(id, rack_env = {})
-       Thread.current[TRACER_TIMESTAMP] = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6N") + " ##{$$}"
+      Thread.current[TRACER_TIMESTAMP] = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6N")
       Thread.current[TRACER_KEY] = id
       # setting to the rack_env, gives error tracking support in some systems
       rack_env[TRACER_KEY] = id
@@ -23,7 +23,11 @@ module Imprint
     end
 
     def self.get_trace_timestamp
-      Thread.current[TRACER_TIMESTAMP] || Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6N") + " ##{$$}"
+      Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6N")
+    end
+
+    def self.get_pid
+      "#{$$}"
     end
 
     def self.insert_trace_id_in_message(message, severity = nil)
@@ -31,8 +35,8 @@ module Imprint
         trace_id = get_trace_id
 
         if trace_id && trace_id != TRACE_ID_DEFAULT
-          message.insert 0, "[#{get_trace_timestamp}] #{severity} -- : "
-          message.gsub!("\n"," trace_id=#{trace_id}\n")
+          message.insert 0, "log_time=#{get_trace_timestamp} log_level=#{severity} "
+          message.gsub!("\n"," process_pid=#{get_pid} trace_id=#{trace_id}\n")
         end
       end
     end

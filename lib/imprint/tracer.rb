@@ -35,7 +35,7 @@ module Imprint
         trace_id = get_trace_id
 
         if trace_id && trace_id != TRACE_ID_DEFAULT
-          message.insert 0, "log_time=#{get_trace_timestamp} log_level=#{severity} "
+          message.insert 0, "#{get_trace_timestamp} #{severity} "
           message.gsub!("\n"," process_pid=#{get_pid} trace_id=#{trace_id}\n")
         end
       end

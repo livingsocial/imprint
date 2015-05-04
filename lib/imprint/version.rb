@@ -1,3 +1,3 @@
 module Imprint
-  VERSION = "1.4.3.pre6"
+  VERSION = "1.4.3.pre7"
 end

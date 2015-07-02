@@ -39,8 +39,8 @@ class TracerTest < Minitest::Test
   should "generate rand trace id" do
     trace_id = Imprint::Tracer.rand_trace_id
     refute_nil trace_id
-    assert_equal 6, trace_id.length
-    assert trace_id.match(/[A-Za-z]/)
+    assert_equal 36, trace_id.length
+    assert trace_id.match(/[a-f0-9\-]/)
   end
 
   protected

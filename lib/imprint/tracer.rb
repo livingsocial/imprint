@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Imprint
   class Tracer
     TRACER_HEADER    = 'HTTP_IMPRINTID'
@@ -5,7 +7,6 @@ module Imprint
     RAILS_REQUEST_ID = "action_dispatch.request_id"
     TRACE_ID_DEFAULT = "-1"
     TRACER_TIMESTAMP = "TIMESTAMP"
-    TRACE_CHARS      = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
 
     def self.set_trace_id(id, rack_env = {})
       Thread.current[TRACER_TIMESTAMP] = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6N")
@@ -42,7 +43,7 @@ module Imprint
     end
 
     def self.rand_trace_id
-      (0...6).map { TRACE_CHARS[rand(TRACE_CHARS.length)] }.join
+      SecureRandom.uuid
     end
   end
 end
